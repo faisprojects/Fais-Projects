@@ -1,0 +1,96 @@
+#include <IRremote.h>
+int RECV_PIN = 12;
+int ledred = 10;
+int ledgr = 11;
+int buz = 9;
+int sensorPin = A0;
+int powerPin = 8;
+int ldr = A2;
+int nilaildr = 0;
+
+int itsONled[]={0,0,0,0};
+int itsONbuz[]={0,0,0,0};
+
+#define code1   12495
+#define code2   6375
+#define code3   25245
+#define code4   31365
+
+IRrecv irrecv (RECV_PIN);
+decode_results results;
+
+void setup() {
+  Serial.begin (9600);
+  irrecv.enableIRIn();
+  pinMode(ledred, OUTPUT);
+  pinMode(ledgr, OUTPUT);
+  pinMode(buz, OUTPUT);
+  pinMode(powerPin, OUTPUT);
+  digitalWrite(powerPin, LOW);
+  Serial.begin (9600);
+  Serial.begin (9600);
+  // put your setup code here, to run once:
+
+}
+
+void loop() {
+  nilaildr = analogRead(ldr);
+  Serial.print("Nilaildr= ");
+  Serial.println(nilaildr);
+  if(nilaildr<=500)
+  {
+    digitalWrite(ledgr, HIGH);
+  }
+  else
+  {
+    digitalWrite(ledgr, LOW);
+  }
+    if(nilaildr>500)
+  {
+    digitalWrite(ledred, HIGH);
+    digitalWrite(buz, HIGH);
+    delay (500);
+    digitalWrite(buz, LOW);
+    delay (500);
+    Serial.print("Nilai Kelembaman : ");
+    Serial.println(bacaSensor());
+    delay ( 3000 );
+  }
+  else
+  {
+    digitalWrite(ledred, LOW);
+  }
+  if (irrecv.decode(&results))
+  {
+    unsigned int nilai = results.value;
+    switch(nilai)
+    {
+      case code4:
+      if(itsONbuz[4] == 1) 
+      {
+        digitalWrite(buz, LOW);
+        itsONbuz[4] = 0;
+      } 
+      else 
+      {
+        digitalWrite(buz, HIGH);
+        itsONbuz[4] = 1;
+      }
+      break;
+     }
+
+    Serial.println(nilai);
+    irrecv.resume();
+  }
+  
+  // put your main code here, to run repeatedly:
+
+}
+int bacaSensor()
+    {
+      digitalWrite(powerPin, HIGH);
+      delay(500);
+      int nilaiSensor = analogRead(sensorPin);
+      digitalWrite(powerPin, LOW);
+      return 1023 - nilaiSensor;
+    }
